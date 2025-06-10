@@ -27,7 +27,7 @@ def collide_with_walls(sprite, group, dir):
 
 class Bullet(pg.sprite.Sprite):
     def __init__(self, game, pos, dir):
-        self.groups = game.all_sprites
+        self.groups = game.all_sprites, game.bullets
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((10,10))
@@ -117,7 +117,7 @@ class Player(pg.sprite.Sprite):
 
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.bullets
+        self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.image.load("Enemy_Turret.png")
@@ -140,6 +140,18 @@ class Mob(pg.sprite.Sprite):
 
         self.health = MOB_HEALTH
 
+    def draw_health(self):
+        if self.health > 60:
+            col = GREEN
+        elif self.health > 30:
+            col = YELLOW
+        else:
+            col = RED
+        width = int(self.rect.width * self.health / MOB_HEALTH)
+        self.health_bar = pg.Rect(0,0,width,7)
+        if self.health < MOB_HEALTH:
+            pg.draw.rect(self.image,col,self.health_bar)
+
     def avoid_mobs(self):
         for mob in self.game.mobs:
             if mob != self:
@@ -160,12 +172,14 @@ class Mob(pg.sprite.Sprite):
         self.acc += self.vel * -1
         self.vel += self.acc * self.game.dt
         self.pos += self.vel * self.game.dt + .5 * self.acc * self.game.dt ** 2
-        self.rect.centerx = self.pos.x
-        self.rect.centery = self.pos.y
+        self.hit_rect.centerx = self.pos.x
+        self.hit_rect.centery = self.pos.y
         # self.x += self.vx * self.game.dt
         # self.y += self.vy * self.game.dt
         collide_with_walls(self,self.game.walls,'x')
         collide_with_walls(self,self.game.walls,'y')
+        if self.health <= 0:
+            self.kill()
         self.rect.center = self.hit_rect.center
 
 

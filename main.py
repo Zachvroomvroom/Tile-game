@@ -1,4 +1,5 @@
 import pygame as pg
+import random as rn
 import sys
 from os import path
 from settings import *
@@ -35,7 +36,7 @@ class Game:
 
     def load_data(self):
         game_folder = path.dirname(__file__)
-        self.map = Map(path.join(game_folder,'map.txt'))
+        self.map = Map(path.join(game_folder, str(rn.choice(MAP_CHOICES))+'.txt'))
         # self.map_data = []
         # with open(path.join(game_folder, 'map.txt'), 'rt') as f:
         #     for line in f:
@@ -66,6 +67,7 @@ class Game:
             self.dt = self.clock.tick(FPS) / 1000
             self.events()
             self.update()
+
             self.draw()
 
     def quit(self):
@@ -76,11 +78,10 @@ class Game:
         # update portion of the game loop
         self.all_sprites.update()
         self.camera.update(self.player)
-        hits = pg.sprite.groupcollide(self.mobs,self.bullets, False, False)
-        for mob in hits:
-            if hits:
-                mob.health -= BULLET_DAMAGE
-                mob.vel = vec(0,0)
+        hits = pg.sprite.groupcollide(self.mobs,self.bullets, False, True)
+        for hit in hits:
+            hit.health -= BULLET_DAMAGE
+            hit.vel = vec(0,0)
         hits = pg.sprite.spritecollide(self.player, self.mobs, False)
         if self.player.health <= 0:
             self.playing = False
@@ -98,6 +99,8 @@ class Game:
         self.screen.fill(BGCOLOR)
         self.draw_grid()
         for sprite in self.all_sprites:
+            if isinstance(sprite,Mob):
+                sprite.draw_health()
             self.screen.blit(sprite.image, self.camera.apply(sprite))
         # self.all_sprites.draw(self.screen)
         draw_player_health(self.screen,10,10,self.player.health / PLAYER_HEALTH)

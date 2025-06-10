@@ -97,7 +97,7 @@ class Game:
 
     def draw(self):
         self.screen.fill(BGCOLOR)
-        self.draw_grid()
+        # self.draw_grid()
         for sprite in self.all_sprites:
             if isinstance(sprite,Mob):
                 sprite.draw_health()
